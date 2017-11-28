@@ -13,24 +13,44 @@
         android:orientation="horizontal">
 
         <Button
-            style="?android:attr/buttonBarButtonStyle"
             android:id="@+id/button2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/start" />
+            android:onClick="startGame"
+            android:text="@string/start"
+            tools:ignore="ButtonStyle" />
 
         <Button
-            style="?android:attr/buttonBarButtonStyle"
             android:id="@+id/button"
+            android:onClick="pauseGame"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/pause" />
+            android:text="@string/pause"
+            tools:ignore="ButtonStyle" />
+
+        <Button
+            android:id="@+id/button_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="turnLeft"
+            android:text="@string/left"
+            tools:ignore="ButtonStyle" />
+
+        <Button
+            android:id="@+id/button_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="turnRight"
+            android:text="@string/right"
+            tools:ignore="ButtonStyle" />
 
     </LinearLayout>
 
     <SeekBar
         android:id="@+id/seekBar"
-        android:max="1000"
+        android:max="50"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -46,6 +66,7 @@
         <com.loongstone.supertetris.TetrisView
             android:id="@+id/tv"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_margin="10dp" />
     </LinearLayout>
 </LinearLayout>

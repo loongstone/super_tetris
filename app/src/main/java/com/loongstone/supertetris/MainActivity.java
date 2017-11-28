@@ -3,9 +3,10 @@ package com.loongstone.supertetris;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.SeekBar;
 
-import java.util.logging.Logger;
+import com.loongstone.supertetris.view.Tetris;
 
 /**
  * @author loongstone
@@ -14,21 +15,23 @@ import java.util.logging.Logger;
 public class MainActivity extends Activity {
     private static final String TAG = "Main";
     private TetrisView tetrisView;
+    private Tetris tetris;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        tetrisView = findViewById(R.id.tv);
         initSeekBar();
+        tetris = new Tetris(tetrisView);
     }
 
     private void initSeekBar() {
-        tetrisView = findViewById(R.id.tv);
         SeekBar seekBar = findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 Log.d(TAG, "onProgressChanged: " + i);
-                tetrisView.setCellSize(i);
+                tetrisView.setCellCountOnWidth(i);
             }
 
             @Override
@@ -43,4 +46,31 @@ public class MainActivity extends Activity {
         });
     }
 
+    public void startGame(View view) {
+        tetris.startGame();
+    }
+
+    public void pauseGame(View view) {
+        tetris.pauseGame();
+    }
+
+    public void turnRight(View view) {
+        tetris.turnRight();
+    }
+
+    public void turnLeft(View view) {
+        tetris.turnLeft();
+    }
+
+    @Override
+    protected void onStop() {
+        tetris.pauseGame();
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        tetris.stopGame();
+        super.onDestroy();
+    }
 }
