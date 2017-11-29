@@ -1,5 +1,7 @@
 package com.loongstone.supertetris.view;
 
+import java.util.Random;
+
 /**
  * @author loongstone
  * @date 2017/11/29
@@ -9,6 +11,47 @@ public class Part {
     public static final int DIR_90 = 1;
     public static final int DIR_180 = 2;
     public static final int DIR_270 = 3;
+    private static final int DIT_COUNT = 4;
+    private static final boolean[][] PART_A = {
+            {false, true, false},
+            {true, true, true},
+    };
+    private static final boolean[][] PART_B = {
+            {true, false, false},
+            {true, true, true},
+    };
+    private static final boolean[][] PART_C = {
+            {true, true, true, true},
+    };
+    private static final boolean[][] PART_D = {
+            {true, true},
+            {true, true},
+    };
+    private static boolean[][][] parts = {PART_A, PART_B, PART_C, PART_D};
+    private static final String TAG = "Tetris";
+    private static Random random = new Random(System.currentTimeMillis());
+
+    /**
+     * 只能通过静态方法实例化
+     */
+    private Part() {
+
+    }
+
+    /**
+     * 实例化并赋予随机属性
+     *
+     * @return
+     */
+    public static Part getRandomPart() {
+        random.setSeed(System.currentTimeMillis());
+        Part part = new Part();
+        //取较大的随机数,然后取余数,得到较小的随机数
+        part.part = parts[random.nextInt(1000) % parts.length];
+        part.direction = random.nextInt(1000) % DIT_COUNT;
+        part.bottomIndex = -1;
+        return part;
+    }
 
     public int getWidth() {
         if (part != null) {

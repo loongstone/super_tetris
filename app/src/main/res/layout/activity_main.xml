@@ -22,9 +22,9 @@
 
         <Button
             android:id="@+id/button"
-            android:onClick="pauseGame"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:onClick="pauseGame"
             android:text="@string/pause"
             tools:ignore="ButtonStyle" />
 
@@ -58,15 +58,15 @@
 
     <SeekBar
         android:id="@+id/seekBar"
-        android:max="50"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:max="50" />
 
     <LinearLayout
-        android:layout_margin="20dp"
-        android:layout_gravity="center"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_margin="20dp"
         android:layout_weight="1"
         android:background="@drawable/new1"
         android:orientation="horizontal">

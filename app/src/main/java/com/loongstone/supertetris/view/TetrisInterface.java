@@ -7,6 +7,11 @@ package com.loongstone.supertetris.view;
 
 public interface TetrisInterface {
     /**
+     * 开始新游戏
+     */
+    void startNewGame();
+
+    /**
      * 开始游戏
      */
     void startGame();
@@ -64,5 +69,10 @@ public interface TetrisInterface {
      * 变换形状的方向
      */
     void shift();
+
+    /**
+     * 游戏结束时候调用
+     */
+    void onGameOver();
 
 }
