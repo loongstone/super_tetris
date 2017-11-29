@@ -323,11 +323,11 @@ public class TetrisView extends View {
         return mPoints;
     }
 
-    public int getmCellCountX() {
+    public int getCellCountX() {
         return mCellCountX;
     }
 
-    public int getmCellCountY() {
+    public int getCellCountY() {
         return mCellCountY;
     }
 }

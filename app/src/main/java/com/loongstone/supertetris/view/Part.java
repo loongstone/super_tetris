@@ -22,21 +22,27 @@ public class Part {
     };
     private static final boolean[][] PART_C = {
             {true, true, true, true},
-
     };
     private static final boolean[][] PART_D = {
             {true, true},
             {true, true},
-
     };
-    static boolean[][][] parts = {PART_A, PART_B, PART_C, PART_D};
-    static final String TAG = "Tetris";
+    private static boolean[][][] parts = {PART_A, PART_B, PART_C, PART_D};
+    private static final String TAG = "Tetris";
     private static Random random = new Random(System.currentTimeMillis());
 
+    /**
+     * 只能通过静态方法实例化
+     */
     private Part() {
 
     }
 
+    /**
+     * 实例化并赋予随机属性
+     *
+     * @return
+     */
     public static Part getRandomPart() {
         random.setSeed(System.currentTimeMillis());
         Part part = new Part();

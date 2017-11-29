@@ -16,6 +16,7 @@ public class MainActivity extends Activity {
     private static final String TAG = "Main";
     private TetrisView tetrisView;
     private Tetris tetris;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
