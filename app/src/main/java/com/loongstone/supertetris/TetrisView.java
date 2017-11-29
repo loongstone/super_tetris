@@ -1,6 +1,5 @@
 package com.loongstone.supertetris;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +11,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.loongstone.supertetris.view.Part;
 
 /**
  * @author loongstone
@@ -115,7 +116,12 @@ public class TetrisView extends View {
      */
     public void setPart(Part part) {
         //不能比画布大
-        if (part.getHeight() > mCellCountY || part.getWidth() > mCellCountX) {
+        int x = part.getWidth();
+        int y = part.getHeight();
+        if (part.direction == Part.DIR_90 || part.direction == Part.DIR_270) {
+            x = part.getHeight();
+        }
+        if (y > mCellCountY || x > mCellCountX) {
             return;
         }
         mPart = part;
@@ -123,48 +129,13 @@ public class TetrisView extends View {
         if (mPart.leftIndex < 0) {
             mPart.leftIndex = 0;
         }
-        if (mPart.leftIndex + mPart.getWidth() > mCellCountX) {
-            mPart.leftIndex = mCellCountX - mPart.getWidth();
+        if (mPart.leftIndex + x > mCellCountX) {
+            mPart.leftIndex = mCellCountX - x;
         }
         //底部极限
         if (mPart.bottomIndex >= mCellCountY) {
             mPart.bottomIndex = mCellCountY - 1;
         }
-    }
-
-    public static class Part {
-        public static final int DIR_0 = 1;
-        public static final int DIR_90 = 2;
-        public static final int DIR_180 = 3;
-        public static final int DIR_270 = 4;
-
-        int getWidth() {
-            if (part != null) {
-                return part.length;
-            }
-            return 0;
-        }
-
-        int getHeight() {
-            if (part != null) {
-                return part[0].length;
-            }
-            return 0;
-        }
-
-        public boolean[][] part;
-        /**
-         * 底部位置
-         */
-        public int bottomIndex;
-        /**
-         * 左边位置
-         */
-        public int leftIndex;
-        /**
-         * 旋转方向
-         */
-        public int direction;
     }
 
     private Part mPart;
@@ -177,13 +148,15 @@ public class TetrisView extends View {
         int x;
         int y;
         for (int j = 0; j < mPart.getHeight(); j++) {
-            y = mPart.bottomIndex - j;
-            if (y < 0) {
-                break;
-            }
             for (int i = 0; i < mPart.getWidth(); i++) {
-                x = mPart.leftIndex + i;
+                int newPosition = mPart.transformPosition(i, j);
+                x = Part.getXFromMixturePosition(newPosition);
+                y = Part.getYFromMixturePosition(newPosition);
                 if (mPart.part[i][j]) {
+                    if (x < 0 || y < 0 || x >= mCellCountX || y >= mCellCountY) {
+                        continue;
+                    }
+                    Log.d(TAG, "drawPartDraw: X:" + x + "  Y:" + y);
                     drawBitMap(canvas, x, y);
                 }
             }
@@ -234,7 +207,7 @@ public class TetrisView extends View {
                     mBlockBitmap.recycle();
                 }
             }
-            Bitmap oldBlockBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.block);
+            Bitmap oldBlockBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.block_green);
             mBlockBitmap = scaleBitmap(oldBlockBitmap, mBlockBitMapSize, mBlockBitMapSize);
         }
     }

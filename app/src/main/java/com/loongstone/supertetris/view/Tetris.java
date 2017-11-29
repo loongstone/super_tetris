@@ -16,18 +16,33 @@ import java.util.TimerTask;
 public class Tetris implements TetrisInterface {
     private static final String TAG = "Tetris";
     private Timer timer;
-    private int mDelay = 600;
+    private int mDelay = 500;
     private TetrisView mTetrisView;
-    private TetrisView.Part part;
-    private static final boolean[][] PART_T = {
+    private Part part;
+    private static final boolean[][] PART_A = {
             {false, true, false},
             {true, true, true},
     };
+    private static final boolean[][] PART_B = {
+            {true, false, false},
+            {true, true, true},
+    };
+    private static final boolean[][] PART_C = {
+            {true, true, true, true},
+
+    };
+    private static final boolean[][] PART_D = {
+            {true, true},
+            {true, true},
+
+    };
+    private static boolean[][][] test = {PART_A, PART_B, PART_C, PART_D};
 
     public Tetris(TetrisView view) {
-        part = new TetrisView.Part();
-        part.part = PART_T;
+        part = new Part();
+        part.part = PART_A;
         part.leftIndex = 4;
+        part.direction = Part.DIR_90;
         mTetrisView = view;
     }
 
@@ -82,19 +97,23 @@ public class Tetris implements TetrisInterface {
 
     }
 
-    private int line = 0;
+    private int line = -1;
+    private int shap = 0;
 
     @Override
     public void onTimer() {
-        if (line >= mTetrisView.getBlockPoints()[0].length) {
+        line++;
+        if (line >= mTetrisView.getBlockPoints()[0].length || line < 0) {
             line = 0;
+            shap++;
+            shap %= test.length;
         }
-        mTetrisView.getBlockPoints()[0][line] = !mTetrisView.getBlockPoints()[2][line];
+        //mTetrisView.getBlockPoints()[0][line] = !mTetrisView.getBlockPoints()[0][line];
+        part.part = test[shap];
         part.bottomIndex = line;
         mTetrisView.setPart(part);
         mTetrisView.postInvalidate();
         Log.d(TAG, "onTimer: ");
-        line++;
     }
 
     private boolean left = false;
@@ -112,7 +131,6 @@ public class Tetris implements TetrisInterface {
 
     @Override
     public void turnRight() {
-        rigth = true;
         if (part != null) {
             part.leftIndex++;
             mTetrisView.setPart(part);
@@ -120,4 +138,17 @@ public class Tetris implements TetrisInterface {
         }
     }
 
+    @Override
+    public void shift() {
+        if (part != null) {
+            part.direction++;
+            part.direction %= 4;
+            mTetrisView.setPart(part);
+            mTetrisView.postInvalidate();
+        }
+    }
+
+    private boolean isBlockOverride() {
+        return true;
+    }
 }

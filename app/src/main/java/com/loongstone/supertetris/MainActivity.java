@@ -62,6 +62,10 @@ public class MainActivity extends Activity {
         tetris.turnLeft();
     }
 
+    public void shiftSharp(View view) {
+        tetris.shift();
+    }
+
     @Override
     protected void onStop() {
         tetris.pauseGame();
@@ -73,4 +77,5 @@ public class MainActivity extends Activity {
         tetris.stopGame();
         super.onDestroy();
     }
+
 }

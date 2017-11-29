@@ -60,4 +60,9 @@ public interface TetrisInterface {
      */
     void turnRight();
 
+    /**
+     * 变换形状的方向
+     */
+    void shift();
+
 }
