@@ -134,22 +134,43 @@ public class Tetris implements TetrisInterface {
                     continue;
                 }
                 if (currentPart.part[i][j]) {
-                    mTetrisView.getBlockPoints()[x][y] = true;
+                    mTetrisView.getBlockPoints().setPoint(x, y, true);
                 }
             }
         }
         //TODO 消除
+        int headLine = currentPart.bottomIndex;
+        //旋转导致宽高可能不匹配
+        int footLine = Math.min(headLine - currentPart.getHeight(), headLine - currentPart.getWidth());
+        if (footLine < 0) {
+            footLine = 0;
+        }
+        Wall wall = mTetrisView.getBlockPoints();
+        //是否应该清除此行
+        boolean lineShouldRemove = true;
+        for (int j = headLine; j >= footLine; j--) {
+            for (int i = 0; i < wall.getWidth(); i++) {
+                if (!wall.getPoint(i, j)) {
+                    //TODO 清除行并整体下移
+                    lineShouldRemove = false;
+                    break;
+                }
+            }
+            if (lineShouldRemove) {
+                Log.d(TAG, "savePart: ------------------清除此行" + j);
+            }
+        }
         return gameEnd;
     }
 
     /**
      * 是否被其他块或者界限挡住
      *
-     * @param map  方块地图数据
+     * @param wall 方块地图数据
      * @param part 下落的方块
      * @return 下落方块是否与已有地图上的方块干涉
      */
-    private boolean isBlockOverride(boolean[][] map, Part part) {
+    private boolean isBlockOverride(Wall wall, Part part) {
         int x;
         int y;
         for (int j = 0; j < part.getHeight(); j++) {
@@ -160,14 +181,14 @@ public class Tetris implements TetrisInterface {
                 if (x < 0 || y < 0) {
                     continue;
                 }
-                if (y >= map[0].length) {
+                if (y >= wall.getHeight()) {
                     return true;
                 }
-                if (x >= map.length) {
+                if (x >= wall.getWidth()) {
                     return true;
                 }
-                Log.d(TAG, "isBlockOverride: x" + x + "  Y" + y + "   ==" + map[0].length);
-                if (map[x][y] && part.part[i][j]) {
+                Log.d(TAG, "isBlockOverride: x" + x + "  Y" + y + "   ==" + wall.getHeight());
+                if (wall.getPoint(x, y) && part.part[i][j]) {
                     return true;
                 }
             }
@@ -179,13 +200,9 @@ public class Tetris implements TetrisInterface {
      * 清空画布
      */
     private void clearMap() {
-        if (mTetrisView != null && mTetrisView.getBlockPoints() != null) {
-            boolean[][] map = mTetrisView.getBlockPoints();
-            for (int i = 0; i < map.length; i++) {
-                for (int j = 0; j < map[0].length; j++) {
-                    map[i][j] = false;
-                }
-            }
+        Wall wall = mTetrisView.getBlockPoints();
+        if (mTetrisView != null && wall != null) {
+            wall.clear();
         }
     }
 

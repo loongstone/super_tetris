@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.loongstone.supertetris.view.Part;
+import com.loongstone.supertetris.view.Wall;
 
 /**
  * @author loongstone
@@ -40,9 +41,7 @@ public class TetrisView extends View {
     private int mHeight;
     private int mLeft;
     private int mTop;
-    private boolean[][] mPoints;
-    private int x;
-    private int y;
+    private Wall wall;
     private Bitmap mBlockBitmap;
     private boolean mTouchMovieFlag = false;
     private int smallLineWidth;
@@ -95,7 +94,7 @@ public class TetrisView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mPoints == null) {
+        if (wall == null) {
             initPoints();
         }
         //绘制大矩形框
@@ -104,7 +103,6 @@ public class TetrisView extends View {
         //绘制横竖线
         drawWebLines(canvas);
         //固定不变的背景,如画布,通过bitmap来简化和提高效率  canvas.drawBitmap()
-        //drawMyRect(canvas, 5, 5, mRectPaint);
         drawPoint(canvas);
         drawPart(canvas);
     }
@@ -165,6 +163,8 @@ public class TetrisView extends View {
 
     private void drawWebLines(Canvas canvas) {
         mLinePaint.setStrokeWidth(smallLineWidth);
+        int x;
+        int y;
         for (int i = 1; i < mCellCountX; i++) {
             x = mLeft + i * mCellSize;
             canvas.drawLine(x, mTop, x, mHeight - mTop, mLinePaint);
@@ -216,12 +216,7 @@ public class TetrisView extends View {
      * 生成单元格状态数组
      */
     private void initPoints() {
-        mPoints = new boolean[mCellCountX][mCellCountY];
-        for (int i = 0; i < mCellCountX; i++) {
-            for (int j = 0; j < mCellCountY; j++) {
-                mPoints[i][j] = false;
-            }
-        }
+        wall = new Wall(mCellCountX, mCellCountY);
     }
 
     @Override
@@ -285,7 +280,7 @@ public class TetrisView extends View {
     private void drawPoint(Canvas canvas) {
         for (int i = 0; i < mCellCountX; i++) {
             for (int j = 0; j < mCellCountY; j++) {
-                if (mPoints[i][j]) {
+                if (wall.getPoint(i, j)) {
                     drawBitMap(canvas, i, j);
                 }
             }
@@ -304,23 +299,23 @@ public class TetrisView extends View {
         if (indexX < 0 || indexY < 0) {
             return;
         }
-        if (indexX < mPoints.length && indexY < mPoints[0].length) {
-            mPoints[indexX][indexY] = !mPoints[indexX][indexY];
+        if (indexX < wall.getWidth() && indexY < wall.getHeight()) {
+            wall.reversePoint(indexX, indexY);
         }
         invalidate();
     }
 
     public void setBlockStatus(int indexX, int indexY, boolean show) {
-        if (mPoints != null) {
+        if (wall != null) {
             //防止越界
-            if (mPoints.length > indexX && mPoints[0].length > indexY) {
-                mPoints[indexX][indexY] = show;
+            if (wall.getWidth() > indexX && wall.getHeight() > indexY) {
+                wall.setPoint(indexX, indexY, show);
             }
         }
     }
 
-    public boolean[][] getBlockPoints() {
-        return mPoints;
+    public Wall getBlockPoints() {
+        return wall;
     }
 
     public int getCellCountX() {
