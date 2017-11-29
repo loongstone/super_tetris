@@ -9,6 +9,25 @@ public class Part {
     public static final int DIR_90 = 1;
     public static final int DIR_180 = 2;
     public static final int DIR_270 = 3;
+    private static final boolean[][] PART_A = {
+            {false, true, false},
+            {true, true, true},
+    };
+    private static final boolean[][] PART_B = {
+            {true, false, false},
+            {true, true, true},
+    };
+    private static final boolean[][] PART_C = {
+            {true, true, true, true},
+
+    };
+    private static final boolean[][] PART_D = {
+            {true, true},
+            {true, true},
+
+    };
+    static boolean[][][] test = {PART_A, PART_B, PART_C, PART_D};
+    static final String TAG = "Tetris";
 
     public int getWidth() {
         if (part != null) {
