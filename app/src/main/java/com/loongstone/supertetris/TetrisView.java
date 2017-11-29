@@ -322,4 +322,12 @@ public class TetrisView extends View {
     public boolean[][] getBlockPoints() {
         return mPoints;
     }
+
+    public int getmCellCountX() {
+        return mCellCountX;
+    }
+
+    public int getmCellCountY() {
+        return mCellCountY;
+    }
 }

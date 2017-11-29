@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.loongstone.supertetris.TetrisView;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -19,17 +21,32 @@ public class Tetris implements TetrisInterface {
     private TetrisView mTetrisView;
     private int line = -1;
     private int shap = 0;
-    private Part part;
+    /**
+     * 当前显示的part
+     */
+    private Part currentPart;
+    private int score = 0;
+    private Queue<Part> partQueue = new LinkedList<>();
 
     public Tetris(TetrisView view) {
-        part = new Part();
-        part.leftIndex = 4;
-        part.direction = Part.DIR_90;
+        //currentPart = new Part();
+        //currentPart.leftIndex = 4;
+        //currentPart.direction = Part.DIR_90;
         mTetrisView = view;
     }
 
     @Override
+    public void startNewGame() {
+        clearMap();
+        currentPart = null;
+        //分数归零
+        score = 0;
+        startGame();
+    }
+
+    @Override
     public void startGame() {
+
         if (timer == null) {
             timer = new Timer();
             timer.schedule(new TimerTask() {
@@ -39,6 +56,34 @@ public class Tetris implements TetrisInterface {
                 }
             }, 0, mDelay);
         }
+    }
+
+
+    /**
+     * 清空画布
+     */
+    private void clearMap() {
+        if (mTetrisView != null && mTetrisView.getBlockPoints() != null) {
+            boolean[][] map = mTetrisView.getBlockPoints();
+            for (int i = 0; i < map.length; i++) {
+                for (int j = 0; j < map[0].length; j++) {
+                    map[i][j] = false;
+                }
+            }
+        }
+    }
+
+    /**
+     * 从队列中获取块,保证队列始终至少有一个元素,作为预览;
+     *
+     * @return 返回队列元素
+     */
+    private Part getPartFromQueue() {
+        if (partQueue.isEmpty()) {
+            partQueue.add(Part.getRandomPart());
+        }
+        partQueue.add(Part.getRandomPart());
+        return partQueue.remove();
     }
 
     @Override
@@ -81,101 +126,119 @@ public class Tetris implements TetrisInterface {
 
     @Override
     public void onTimer() {
-        line++;
-        if (line >= mTetrisView.getBlockPoints()[0].length || line < 0) {
-            line = 0;
-            shap++;
-            shap %= Part.test.length;
-            part.part = Part.test[shap];
-            part.bottomIndex = 0;
-            part.leftIndex = 5;
+        //取得元素
+        if (currentPart == null) {
+            currentPart = getPartFromQueue();
         }
-        boolean falled = fall(part.bottomIndex + 1);
-        if (falled) {
-            line = 100;
-        }
-        mTetrisView.setPart(part);
+        boolean fallBottom = fall();
+        mTetrisView.setPart(currentPart);
         mTetrisView.postInvalidate();
-        Log.d(Part.TAG, "onTimer: ");
+        if (fallBottom) {
+            currentPart = getPartFromQueue();
+        }
     }
 
-    private boolean fall(int line) {
-        int oldLine = part.bottomIndex;
-        part.bottomIndex = line;
-        if (isBlockOverride(mTetrisView.getBlockPoints(), part)) {
-            part.bottomIndex = oldLine;
+    /**
+     * 下落函数
+     *
+     * @return 是否下落到底, 或者落在其他元素顶部
+     */
+    private boolean fall() {
+        int oldLine = currentPart.bottomIndex;
+        currentPart.bottomIndex = oldLine + 1;
+
+        if (isBlockOverride(mTetrisView.getBlockPoints(), currentPart)) {
             Log.d(Part.TAG, "fall:");
+            currentPart.bottomIndex = oldLine;
             boolean gameEnd = savePart();
             if (gameEnd) {
-                Log.d(Part.TAG, "fall: GameOver");
-                pauseGame();
+                Log.d(Part.TAG, "GameOver");
+                onGameOver();
             }
             return true;
         }
         return false;
     }
 
+    /**
+     * 保存,并且完成消除操作
+     *
+     * @return 游戏是否结束
+     */
     private boolean savePart() {
         int x;
         int y;
         boolean gameEnd = false;
-        for (int j = 0; j < part.getHeight(); j++) {
-            for (int i = 0; i < part.getWidth(); i++) {
-                int newPosition = part.transformPosition(i, j);
+        if (currentPart.bottomIndex >= mTetrisView.getY() - 1) {
+            return false;
+        }
+        for (int j = 0; j < currentPart.getHeight(); j++) {
+            for (int i = 0; i < currentPart.getWidth(); i++) {
+                int newPosition = currentPart.transformPosition(i, j);
                 x = Part.getXFromMixturePosition(newPosition);
                 y = Part.getYFromMixturePosition(newPosition);
                 if (x < 0 || y < 0) {
                     gameEnd = true;
                     continue;
                 }
-                if (part.part[i][j]) {
+                if (currentPart.part[i][j]) {
                     mTetrisView.getBlockPoints()[x][y] = true;
                 }
             }
         }
+        //TODO 消除
         return gameEnd;
     }
 
     @Override
     public void turnLeft() {
-        if (part != null) {
-            part.leftIndex--;
-            if (isBlockOverride(mTetrisView.getBlockPoints(), part)) {
-                part.leftIndex++;
+        if (currentPart != null) {
+            currentPart.leftIndex--;
+            if (isBlockOverride(mTetrisView.getBlockPoints(), currentPart)) {
+                currentPart.leftIndex++;
             }
-            mTetrisView.setPart(part);
+            mTetrisView.setPart(currentPart);
             mTetrisView.postInvalidate();
         }
     }
 
     @Override
     public void turnRight() {
-        if (part != null) {
-            part.leftIndex++;
-            if (isBlockOverride(mTetrisView.getBlockPoints(), part)) {
-                part.leftIndex--;
+        if (currentPart != null) {
+            currentPart.leftIndex++;
+            if (isBlockOverride(mTetrisView.getBlockPoints(), currentPart)) {
+                currentPart.leftIndex--;
             }
-            mTetrisView.setPart(part);
+            mTetrisView.setPart(currentPart);
             mTetrisView.postInvalidate();
         }
     }
 
     @Override
     public void shift() {
-        if (part != null) {
-            int old = part.direction;
-            part.direction++;
-            part.direction %= 4;
-            if (isBlockOverride(mTetrisView.getBlockPoints(), part)) {
-                part.direction = old;
-                return;
-            }
-            mTetrisView.setPart(part);
+        if (currentPart != null) {
+            int old = currentPart.direction;
+            currentPart.direction++;
+            currentPart.direction %= 4;
+            //TODO 翻转阻碍情况的判断
+            mTetrisView.setPart(currentPart);
             mTetrisView.postInvalidate();
         }
     }
 
-    private boolean isBlockOverride(final boolean[][] map, Part part) {
+    @Override
+    public void onGameOver() {
+        pauseGame();
+    }
+
+    /**
+     * 是否被其他块或者界限挡住
+     *
+     * @param map  方块地图数据
+     * @param part 下落的方块
+     * @return 下落方块是否与已有地图上的方块干涉
+     */
+    private boolean isBlockOverride(boolean[][] map, Part part) {
         int x;
         int y;
         for (int j = 0; j < part.getHeight(); j++) {
