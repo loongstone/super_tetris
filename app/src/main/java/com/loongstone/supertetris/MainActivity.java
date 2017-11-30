@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
     }
 
     public void startGame(View view) {
-        tetris.startGame();
+        tetris.startNewGame();
     }
 
     public void pauseGame(View view) {

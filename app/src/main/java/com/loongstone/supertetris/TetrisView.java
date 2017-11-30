@@ -113,6 +113,10 @@ public class TetrisView extends View {
      * @param part 移动模块数组,最大4x4
      */
     public void setPart(Part part) {
+        if (part == null) {
+            this.mPart = null;
+            return;
+        }
         //不能比画布大
         int x = part.getWidth();
         int y = part.getHeight();

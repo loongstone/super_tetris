@@ -29,7 +29,7 @@ public class Part {
     };
     private static boolean[][][] parts = {PART_A, PART_B, PART_C, PART_D};
     private static final String TAG = "Tetris";
-    private static Random random = new Random(System.currentTimeMillis());
+    private static Random random = new Random();
 
     /**
      * 只能通过静态方法实例化
@@ -41,13 +41,13 @@ public class Part {
     /**
      * 实例化并赋予随机属性
      *
-     * @return
+     * @return 随机属性的块
      */
     public static Part getRandomPart() {
-        random.setSeed(System.currentTimeMillis());
         Part part = new Part();
         //取较大的随机数,然后取余数,得到较小的随机数
         part.part = parts[random.nextInt(1000) % parts.length];
+        random.setSeed(System.nanoTime());
         part.direction = random.nextInt(1000) % DIT_COUNT;
         part.bottomIndex = -1;
         return part;

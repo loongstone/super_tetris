@@ -17,7 +17,7 @@ import java.util.TimerTask;
 
 public class Tetris implements TetrisInterface {
 
-    public static final String TAG = "Tetris";
+    private static final String TAG = "Tetris";
 
     private Timer timer;
     private int mDelay = 500;
@@ -82,55 +82,59 @@ public class Tetris implements TetrisInterface {
         if (currentPart == null) {
             currentPart = getPartFromQueue();
         }
-        boolean fallBottom = fall();
-        mTetrisView.setPart(currentPart);
-        mTetrisView.postInvalidate();
-        if (fallBottom) {
-            currentPart = getPartFromQueue();
-        }
-    }
-
-    /**
-     * 下落函数
-     *
-     * @return 是否下落到底, 或者落在其他元素顶部
-     */
-    private boolean fall() {
-        int oldLine = currentPart.bottomIndex;
-        currentPart.bottomIndex = oldLine + 1;
-
-        if (isBlockOverride(mTetrisView.getBlockPoints(), currentPart)) {
-            Log.d(TAG, "fall:");
-            currentPart.bottomIndex = oldLine;
-            boolean gameEnd = savePart();
-            if (gameEnd) {
-                Log.d(TAG, "GameOver");
+        boolean fallSucceed = tryToFall();
+        if (!fallSucceed) {
+            boolean gameOver = putPartToWall();
+            if (gameOver) {
                 onGameOver();
             }
-            return true;
         }
-        return false;
+        //设置块,并刷新显示
+        mTetrisView.setPart(currentPart);
+        mTetrisView.postInvalidate();
     }
 
     /**
-     * 保存,并且完成消除操作
+     * 使方块进行下落
+     *
+     * @return true:可以继续下落  false:已经下落到底, 或者落在其他元素顶部,则无法下落
+     */
+    private boolean tryToFall() {
+        int oldLine = currentPart.bottomIndex;
+        //下落一层
+        currentPart.bottomIndex = oldLine + 1;
+        boolean blocked = isBeBlocked(mTetrisView.getBlockPoints(), currentPart);
+        //下落被挡住,无法下落,已经到达底部
+        if (blocked) {
+            Log.d(TAG, "tryToFall:");
+            currentPart.bottomIndex = oldLine;
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * 当方块无法下落,并且已经落在底部或者已有元素上的时候,把方块加入到 Wall中 ,并检测游戏是否因为Wall高度用尽而结束
      *
      * @return 游戏是否结束
      */
-    private boolean savePart() {
+    private boolean putPartToWall() {
         int x;
         int y;
-        boolean gameEnd = false;
+        boolean isGameOver = false;
+        //方块必须在 画布 的范围内
         if (currentPart.bottomIndex >= mTetrisView.getY() - 1) {
             return false;
         }
+        //遍历方块中的子块,并设置到Wall 中,同时根据方块是否超出来判断游戏是否结束
         for (int j = 0; j < currentPart.getHeight(); j++) {
             for (int i = 0; i < currentPart.getWidth(); i++) {
                 int newPosition = currentPart.transformPosition(i, j);
                 x = Part.getXFromMixturePosition(newPosition);
                 y = Part.getYFromMixturePosition(newPosition);
                 if (x < 0 || y < 0) {
-                    gameEnd = true;
+                    isGameOver = true;
                     continue;
                 }
                 if (currentPart.part[i][j]) {
@@ -138,29 +142,34 @@ public class Tetris implements TetrisInterface {
                 }
             }
         }
-        //TODO 消除
-        int headLine = currentPart.bottomIndex;
-        //旋转导致宽高可能不匹配
-        int footLine = Math.min(headLine - currentPart.getHeight(), headLine - currentPart.getWidth());
-        if (footLine < 0) {
-            footLine = 0;
-        }
+
         Wall wall = mTetrisView.getBlockPoints();
+        int headLine = wall.getHeight() - 1;
+
         //是否应该清除此行
-        boolean lineShouldRemove = true;
-        for (int j = headLine; j >= footLine; j--) {
+        boolean lineShouldRemove;
+        //遍历所有行
+        for (int j = headLine; j >= 0; ) {
+            lineShouldRemove = true;
+            ////遍历行的元素,检测此行是否需要被消除
             for (int i = 0; i < wall.getWidth(); i++) {
                 if (!wall.getPoint(i, j)) {
-                    //TODO 清除行并整体下移
                     lineShouldRemove = false;
+                    j--;
                     break;
                 }
             }
+            //清除此行,通过交换行的方式,整体下移,填充被清除的行
             if (lineShouldRemove) {
-                Log.d(TAG, "savePart: ------------------清除此行" + j);
+                wall.clearLine(j);
+                for (int k = j; k >= 1; k--) {
+                    wall.exchangeLine(k, k - 1);
+                }
             }
         }
-        return gameEnd;
+        //添加到Wall之后清除当前块
+        currentPart = null;
+        return isGameOver;
     }
 
     /**
@@ -170,7 +179,7 @@ public class Tetris implements TetrisInterface {
      * @param part 下落的方块
      * @return 下落方块是否与已有地图上的方块干涉
      */
-    private boolean isBlockOverride(Wall wall, Part part) {
+    private boolean isBeBlocked(Wall wall, Part part) {
         int x;
         int y;
         for (int j = 0; j < part.getHeight(); j++) {
@@ -187,7 +196,7 @@ public class Tetris implements TetrisInterface {
                 if (x >= wall.getWidth()) {
                     return true;
                 }
-                Log.d(TAG, "isBlockOverride: x" + x + "  Y" + y + "   ==" + wall.getHeight());
+                Log.d(TAG, "isBeBlocked: x" + x + "  Y" + y + "   ==" + wall.getHeight());
                 if (wall.getPoint(x, y) && part.part[i][j]) {
                     return true;
                 }
@@ -244,7 +253,7 @@ public class Tetris implements TetrisInterface {
     public void turnLeft() {
         if (currentPart != null) {
             currentPart.leftIndex--;
-            if (isBlockOverride(mTetrisView.getBlockPoints(), currentPart)) {
+            if (isBeBlocked(mTetrisView.getBlockPoints(), currentPart)) {
                 currentPart.leftIndex++;
             }
             mTetrisView.setPart(currentPart);
@@ -256,7 +265,7 @@ public class Tetris implements TetrisInterface {
     public void turnRight() {
         if (currentPart != null) {
             currentPart.leftIndex++;
-            if (isBlockOverride(mTetrisView.getBlockPoints(), currentPart)) {
+            if (isBeBlocked(mTetrisView.getBlockPoints(), currentPart)) {
                 currentPart.leftIndex--;
             }
             mTetrisView.setPart(currentPart);

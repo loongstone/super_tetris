@@ -63,8 +63,21 @@ public class Wall {
         }
     }
 
+    public void clearLine(int x) {
+        for (int i = 0; i < getWidth(); i++) {
+            points[x][i] = false;
+        }
+    }
+
     public void reversePoint(int x, int y) {
         points[y][x] = !points[y][x];
+    }
+
+    public void exchangeLine(int x1, int x2) {
+        boolean[] tmp;
+        tmp = points[x1];
+        points[x1] = points[x2];
+        points[x2] = tmp;
     }
 
 }
