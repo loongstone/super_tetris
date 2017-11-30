@@ -1,4 +1,4 @@
-package com.loongstone.supertetris;
+package com.loongstone.supertetris.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.loongstone.supertetris.R;
 import com.loongstone.supertetris.view.Part;
 import com.loongstone.supertetris.view.Wall;
 
@@ -138,6 +139,7 @@ public class TetrisView extends View {
         if (mPart.bottomIndex >= mCellCountY) {
             mPart.bottomIndex = mCellCountY - 1;
         }
+        postInvalidate();
     }
 
     private Part mPart;

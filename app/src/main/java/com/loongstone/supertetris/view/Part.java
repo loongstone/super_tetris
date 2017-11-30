@@ -28,7 +28,7 @@ public class Part {
             {true, true},
     };
     private static boolean[][][] parts = {PART_A, PART_B, PART_C, PART_D};
-    private static final String TAG = "Tetris";
+    private static final String TAG = "SimpleTetris";
     private static Random random = new Random();
 
     /**

@@ -65,15 +65,22 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:gravity="center|start"
+        android:orientation="horizontal">
 
-        <com.loongstone.supertetris.TetrisView
+        <com.loongstone.supertetris.view.TetrisView
             android:id="@+id/preview"
             android:layout_width="45dp"
             android:layout_height="44dp"
             android:layout_margin="10dp"
             android:background="@color/colorAccent"
             android:padding="10dp" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/score" />
     </LinearLayout>
 
     <LinearLayout
@@ -85,13 +92,11 @@
         android:background="@drawable/new1"
         android:orientation="horizontal">
 
-        <com.loongstone.supertetris.TetrisView
+        <com.loongstone.supertetris.view.TetrisView
             android:id="@+id/tv"
-            android:background="#111f97"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="10dp" />
-
 
     </LinearLayout>
 </LinearLayout>

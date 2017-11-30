@@ -5,4 +5,5 @@
     <string name="left"><![CDATA[<<]]></string>
     <string name="right"><![CDATA[>>]]></string>
     <string name="shift">S</string>
+    <string name="score">得分:</string>
 </resources>
