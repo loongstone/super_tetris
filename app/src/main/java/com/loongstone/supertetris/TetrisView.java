@@ -120,7 +120,7 @@ public class TetrisView extends View {
         //不能比画布大
         int x = part.getWidth();
         int y = part.getHeight();
-        if (part.direction == Part.DIR_90 || part.direction == Part.DIR_270) {
+        if (part.getDirection() == Part.DIR_90 || part.getDirection() == Part.DIR_270) {
             x = part.getHeight();
         }
         if (y > mCellCountY || x > mCellCountX) {
@@ -318,7 +318,7 @@ public class TetrisView extends View {
         }
     }
 
-    public Wall getBlockPoints() {
+    public Wall getWall() {
         return wall;
     }
 

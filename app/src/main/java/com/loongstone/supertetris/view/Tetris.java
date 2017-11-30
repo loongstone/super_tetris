@@ -5,6 +5,7 @@ import android.util.Log;
 import com.loongstone.supertetris.TetrisView;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,7 +30,7 @@ public class Tetris implements TetrisInterface {
      */
     private Part currentPart;
     private int score = 0;
-    private Queue<Part> partQueue = new LinkedList<>();
+    private ListQueue<Part> partQueue = new ListQueue<>();
 
 
     public Tetris(TetrisView view) {
@@ -81,6 +82,7 @@ public class Tetris implements TetrisInterface {
         //取得元素
         if (currentPart == null) {
             currentPart = getPartFromQueue();
+            currentPart.leftIndex = mTetrisView.getCellCountX() / 2 - 1;
         }
         boolean fallSucceed = tryToFall();
         if (!fallSucceed) {
@@ -103,7 +105,7 @@ public class Tetris implements TetrisInterface {
         int oldLine = currentPart.bottomIndex;
         //下落一层
         currentPart.bottomIndex = oldLine + 1;
-        boolean blocked = isBeBlocked(mTetrisView.getBlockPoints(), currentPart);
+        boolean blocked = isBeBlocked(mTetrisView.getWall(), currentPart);
         //下落被挡住,无法下落,已经到达底部
         if (blocked) {
             Log.d(TAG, "tryToFall:");
@@ -138,12 +140,12 @@ public class Tetris implements TetrisInterface {
                     continue;
                 }
                 if (currentPart.part[i][j]) {
-                    mTetrisView.getBlockPoints().setPoint(x, y, true);
+                    mTetrisView.getWall().setPoint(x, y, true);
                 }
             }
         }
 
-        Wall wall = mTetrisView.getBlockPoints();
+        Wall wall = mTetrisView.getWall();
         int headLine = wall.getHeight() - 1;
 
         //是否应该清除此行
@@ -190,10 +192,10 @@ public class Tetris implements TetrisInterface {
                 if (x < 0 || y < 0) {
                     continue;
                 }
-                if (y >= wall.getHeight()) {
-                    return true;
-                }
                 if (x >= wall.getWidth()) {
+                    continue;
+                }
+                if (y >= wall.getHeight()) {
                     return true;
                 }
                 Log.d(TAG, "isBeBlocked: x" + x + "  Y" + y + "   ==" + wall.getHeight());
@@ -209,7 +211,7 @@ public class Tetris implements TetrisInterface {
      * 清空画布
      */
     private void clearMap() {
-        Wall wall = mTetrisView.getBlockPoints();
+        Wall wall = mTetrisView.getWall();
         if (mTetrisView != null && wall != null) {
             wall.clear();
         }
@@ -253,7 +255,7 @@ public class Tetris implements TetrisInterface {
     public void turnLeft() {
         if (currentPart != null) {
             currentPart.leftIndex--;
-            if (isBeBlocked(mTetrisView.getBlockPoints(), currentPart)) {
+            if (isBeBlocked(mTetrisView.getWall(), currentPart)) {
                 currentPart.leftIndex++;
             }
             mTetrisView.setPart(currentPart);
@@ -265,7 +267,7 @@ public class Tetris implements TetrisInterface {
     public void turnRight() {
         if (currentPart != null) {
             currentPart.leftIndex++;
-            if (isBeBlocked(mTetrisView.getBlockPoints(), currentPart)) {
+            if (isBeBlocked(mTetrisView.getWall(), currentPart)) {
                 currentPart.leftIndex--;
             }
             mTetrisView.setPart(currentPart);
@@ -276,10 +278,11 @@ public class Tetris implements TetrisInterface {
     @Override
     public void shift() {
         if (currentPart != null) {
-            int old = currentPart.direction;
-            currentPart.direction++;
-            currentPart.direction %= 4;
-            //TODO 翻转阻碍情况的判断
+            currentPart.rotateDirection();
+            if (isBeBlocked(mTetrisView.getWall(), currentPart)) {
+                currentPart.reverseDirection();
+                return;
+            }
             mTetrisView.setPart(currentPart);
             mTetrisView.postInvalidate();
         }
@@ -288,5 +291,9 @@ public class Tetris implements TetrisInterface {
     @Override
     public void onGameOver() {
         pauseGame();
+    }
+
+    public void setPView(TetrisView tetrisView) {
+
     }
 }

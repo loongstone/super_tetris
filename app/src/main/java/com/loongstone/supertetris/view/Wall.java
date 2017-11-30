@@ -1,5 +1,7 @@
 package com.loongstone.supertetris.view;
 
+import com.loongstone.supertetris.TetrisView;
+
 /**
  * @author loongstone
  * @date 2017/11/29
@@ -79,5 +81,4 @@ public class Wall {
         points[x1] = points[x2];
         points[x2] = tmp;
     }
-
 }

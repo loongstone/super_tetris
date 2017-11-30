@@ -53,6 +53,42 @@ public class Part {
         return part;
     }
 
+    public boolean[][] part;
+    /**
+     * 底部位置
+     */
+    public int bottomIndex;
+    /**
+     * 左边位置
+     */
+    public int leftIndex;
+    /**
+     * 旋转方向 0-3 一共四个方向
+     */
+    private int direction;
+
+    public int getDirection() {
+        return direction;
+    }
+
+    /**
+     * 旋转 顺时针
+     */
+    public void rotateDirection() {
+        direction++;
+        direction %= DIT_COUNT;
+    }
+
+    /**
+     * 旋转 逆时针
+     */
+    public void reverseDirection() {
+        //防止出现负数
+        direction += DIT_COUNT;
+        direction--;
+        direction %= DIT_COUNT;
+    }
+
     public int getWidth() {
         if (part != null) {
             return part.length;
@@ -66,20 +102,6 @@ public class Part {
         }
         return 0;
     }
-
-    public boolean[][] part;
-    /**
-     * 底部位置
-     */
-    public int bottomIndex;
-    /**
-     * 左边位置
-     */
-    public int leftIndex;
-    /**
-     * 旋转方向
-     */
-    public int direction;
 
     /**
      * @param originX 数组中的x下标记

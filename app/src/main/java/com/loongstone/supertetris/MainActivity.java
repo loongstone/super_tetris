@@ -15,6 +15,7 @@ import com.loongstone.supertetris.view.Tetris;
 public class MainActivity extends Activity {
     private static final String TAG = "Main";
     private TetrisView tetrisView;
+    private TetrisView tetrisPreview;
     private Tetris tetris;
 
     @Override
@@ -22,8 +23,13 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tetrisView = findViewById(R.id.tv);
+        tetrisPreview = findViewById(R.id.preview);
+        tetrisPreview.setCellCountOnWidth(4);
         initSeekBar();
         tetris = new Tetris(tetrisView);
+        tetris.setPView(tetrisPreview);
+        //TODO 优化界面显示,背景绘制完善, 按钮背景完善,加入预览窗口,成绩,重开提示等    加入日志库,  完善旋转和计分.计时功能
+        //TODO 加入手势操作,支持屏幕旋转,适配多屏幕,最好支持电视
     }
 
     private void initSeekBar() {
